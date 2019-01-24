@@ -5,6 +5,7 @@ var githubParser = require("parse-github-url");
 export function insertAtomLinks() {
   chrome.storage.local.get(["projectRoots"], function(options) {
     const fileLinkNodes = getFileLinkNodes();
+    const fileHeaderNodes = getFileHeaderNodes();
     const atomImg = makeAtomImg();
     const projectName = githubParser(document.URL).name;
     const localProjectRoot = getLocalProjectRoot(options, projectName);
@@ -18,6 +19,23 @@ export function insertAtomLinks() {
           fileLink.text.trim()
         );
         fileLink.after(atomLink);
+      }
+    }
+
+    for (let fileHeader of fileHeaderNodes) {
+      console.log(fileHeader);
+      const fileLink = fileHeader.querySelector(".file-info > a");
+      const desktopLink = fileHeader.querySelector(
+        "a[href^='x-github-client']"
+      );
+      if (fileLink.title) {
+        let atomLink = makeAtomLink();
+        atomLink.href = getAtomLinkUrl(
+          localProjectRoot,
+          projectName,
+          fileLink.title.trim()
+        );
+        desktopLink.after(atomLink);
       }
     }
   });
@@ -37,6 +55,16 @@ function getLocalProjectRoot(options, projectName) {
 
 function getFileLinkNodes() {
   return document.getElementsByClassName("file-info");
+}
+
+function getFileHeaderNodes() {
+  return document.getElementsByClassName("file-header");
+}
+
+function getDesktopLinkNode() {
+  if (fileActionNodes.length) {
+    return fileActionNodes[0].querySelector("a[href^='x-github-client']");
+  }
 }
 
 function makeAtomImg() {
