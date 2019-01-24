@@ -6,10 +6,12 @@ export function insertAtomLinks() {
   chrome.storage.local.get(["projectRoots"], function(options) {
     const fileLinkNodes = getFileLinkNodes();
     const fileHeaderNodes = getFileHeaderNodes();
-    const projectName = githubParser(document.URL).name;
+    const githubUrlInfo = githubParser(document.URL);
+    const projectName = githubUrlInfo.name;
     const projectInfo = {
       projectName: projectName,
-      localProjectRoot: getLocalProjectRoot(options, projectName)
+      localProjectRoot: getLocalProjectRoot(options, projectName),
+      githubUrlInfo: githubUrlInfo
     };
 
     insertFileLinkLevelLinks(fileLinkNodes, projectInfo);
@@ -34,18 +36,34 @@ function insertFileLinkLevelLinks(fileLinkNodes, projectInfo) {
 function insertFileHeaderLevelLinks(fileHeaderNodes, projectInfo) {
   for (let fileHeader of fileHeaderNodes) {
     const fileLink = fileHeader.querySelector(".file-info > a");
-    if (fileLink.title) {
+    if (
+      (fileLink && fileLink.title) ||
+      (projectInfo.githubUrlInfo.branch != "pull" &&
+        projectInfo.githubUrlInfo.filepath)
+    ) {
       const atomImg = makeAtomImg();
       const fileActions = fileHeader.querySelector(".file-actions");
       const desktopLink = fileHeader.querySelector(
         "a[href^='x-github-client']"
       );
-      let atomLink = makeAtomLink();
-      atomLink.href = getAtomLinkUrl(
-        projectInfo.localProjectRoot,
-        projectInfo.projectName,
-        fileLink.title.trim()
-      );
+      let atomLink = makeAtomLink(false);
+      if (fileLink && fileLink.title) {
+        atomLink.href = getAtomLinkUrl(
+          projectInfo.localProjectRoot,
+          projectInfo.projectName,
+          fileLink.title.trim()
+        );
+      } else if (
+        projectInfo.githubUrlInfo.branch != "pull" &&
+        projectInfo.githubUrlInfo.filepath
+      ) {
+        atomLink.href = getAtomLinkUrl(
+          projectInfo.localProjectRoot,
+          projectInfo.projectName,
+          projectInfo.githubUrlInfo.filepath
+        );
+      }
+
       atomLink.setAttribute("class", "btn-octicon");
       atomLink.appendChild(atomImg);
       fileActions.insertBefore(atomLink, desktopLink);
