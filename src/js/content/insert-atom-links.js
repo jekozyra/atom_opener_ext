@@ -10,13 +10,15 @@ export function insertAtomLinks() {
     const localProjectRoot = getLocalProjectRoot(options, projectName);
 
     for (let fileLink of fileLinkNodes) {
-      let atomLink = makeAtomLink();
-      atomLink.href = getAtomLinkUrl(
-        localProjectRoot,
-        projectName,
-        fileLink.text.trim()
-      );
-      fileLink.after(atomLink);
+      if (fileLink.text) {
+        let atomLink = makeAtomLink();
+        atomLink.href = getAtomLinkUrl(
+          localProjectRoot,
+          projectName,
+          fileLink.text.trim()
+        );
+        fileLink.after(atomLink);
+      }
     }
   });
 }
