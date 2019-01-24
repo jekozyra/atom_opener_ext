@@ -1,9 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title></title>
-</head>
-<body>
-</body>
+<html>
+  <head>
+    <title>Atom Open Options</title>
+  </head>
+  <body>
+    <div id="options-form">
+      <span class="projectNameTitle">Project Name</span>
+      <span class="projectRootTitle">Project Root</span>
+      <input
+        type="text"
+        id="projectNameDefault"
+        class="projectName"
+        name="projectNameDefault"
+        value="default"
+        disabled
+      />
+      <input
+        type="text"
+        id="projectRootDefault"
+        class="projectRoot"
+        name="projectRootDefault"
+      />
+    </div>
+
+    <a href="#" id="addProjectPath">+ Add custom project path</a>
+
+    <br />
+
+    <div id="status"></div>
+    <button id="save">Save</button>
+
+    <script src="options.js"></script>
+  </body>
 </html>

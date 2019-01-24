@@ -1,0 +1,13 @@
+.atom-link {
+  z-index: 9999;
+  position: relative;
+}
+
+.atom-img {
+  max-width: 12px;
+  height: auto;
+  z-index: 9999;
+  position: relative;
+  padding: 2px;
+  margin: 2px;
+}

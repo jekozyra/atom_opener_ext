@@ -1,0 +1,15 @@
+#options-form {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  grid-gap: 16px;
+}
+
+.projectName,
+.projectNameTitle {
+  grid-column: 1 / 2;
+}
+
+.projectRoot,
+.projectRootTitle {
+  grid-column: 2 / 3;
+}
