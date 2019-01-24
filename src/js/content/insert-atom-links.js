@@ -1,15 +1,35 @@
+import "../../img/icon-64.png";
+
 var githubParser = require("parse-github-url");
 
 export function insertAtomLinks() {
-  const fileLinkNodes = getFileLinkNodes();
-  const atomImg = makeAtomImg();
-  const projectName = githubParser(document.URL).name;
+  chrome.storage.local.get(["projectRoots"], function(options) {
+    const fileLinkNodes = getFileLinkNodes();
+    const atomImg = makeAtomImg();
+    const projectName = githubParser(document.URL).name;
+    const localProjectRoot = getLocalProjectRoot(options, projectName);
 
-  for (let fileLink of fileLinkNodes) {
-    console.log(fileLink);
-    let atomLink = makeAtomLink();
-    atomLink.href = getAtomLinkUrl("foo/", projectName, fileLink.text.trim());
-    fileLink.after(atomLink);
+    for (let fileLink of fileLinkNodes) {
+      let atomLink = makeAtomLink();
+      atomLink.href = getAtomLinkUrl(
+        localProjectRoot,
+        projectName,
+        fileLink.text.trim()
+      );
+      fileLink.after(atomLink);
+    }
+  });
+}
+
+function getLocalProjectRoot(options, projectName) {
+  if ("projectRoots" in options) {
+    if (projectName in options.projectRoots) {
+      return options.projectRoots.projectName + "/";
+    } else {
+      return options.projectRoots.default;
+    }
+  } else {
+    return "/";
   }
 }
 
