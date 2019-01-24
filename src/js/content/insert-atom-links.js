@@ -1,4 +1,4 @@
-import "../../img/icon-64.png";
+import "../../img/icon-16.png";
 
 var githubParser = require("parse-github-url");
 
@@ -6,39 +6,51 @@ export function insertAtomLinks() {
   chrome.storage.local.get(["projectRoots"], function(options) {
     const fileLinkNodes = getFileLinkNodes();
     const fileHeaderNodes = getFileHeaderNodes();
-    const atomImg = makeAtomImg();
     const projectName = githubParser(document.URL).name;
-    const localProjectRoot = getLocalProjectRoot(options, projectName);
+    const projectInfo = {
+      projectName: projectName,
+      localProjectRoot: getLocalProjectRoot(options, projectName)
+    };
 
-    for (let fileLink of fileLinkNodes) {
-      if (fileLink.text) {
-        let atomLink = makeAtomLink();
-        atomLink.href = getAtomLinkUrl(
-          localProjectRoot,
-          projectName,
-          fileLink.text.trim()
-        );
-        fileLink.after(atomLink);
-      }
+    insertFileLinkLevelLinks(fileLinkNodes, projectInfo);
+    insertFileHeaderLevelLinks(fileHeaderNodes, projectInfo);
+  });
+}
+
+function insertFileLinkLevelLinks(fileLinkNodes, projectInfo) {
+  for (let fileLink of fileLinkNodes) {
+    if (fileLink.text) {
+      let atomLink = makeAtomLink();
+      atomLink.href = getAtomLinkUrl(
+        projectInfo.localProjectRoot,
+        projectInfo.projectName,
+        fileLink.text.trim()
+      );
+      fileLink.after(atomLink);
     }
+  }
+}
 
-    for (let fileHeader of fileHeaderNodes) {
-      console.log(fileHeader);
-      const fileLink = fileHeader.querySelector(".file-info > a");
+function insertFileHeaderLevelLinks(fileHeaderNodes, projectInfo) {
+  for (let fileHeader of fileHeaderNodes) {
+    const fileLink = fileHeader.querySelector(".file-info > a");
+    if (fileLink.title) {
+      const atomImg = makeAtomImg();
+      const fileActions = fileHeader.querySelector(".file-actions");
       const desktopLink = fileHeader.querySelector(
         "a[href^='x-github-client']"
       );
-      if (fileLink.title) {
-        let atomLink = makeAtomLink();
-        atomLink.href = getAtomLinkUrl(
-          localProjectRoot,
-          projectName,
-          fileLink.title.trim()
-        );
-        desktopLink.after(atomLink);
-      }
+      let atomLink = makeAtomLink();
+      atomLink.href = getAtomLinkUrl(
+        projectInfo.localProjectRoot,
+        projectInfo.projectName,
+        fileLink.title.trim()
+      );
+      atomLink.setAttribute("class", "btn-octicon");
+      atomLink.appendChild(atomImg);
+      fileActions.insertBefore(atomLink, desktopLink);
     }
-  });
+  }
 }
 
 function getLocalProjectRoot(options, projectName) {
@@ -69,17 +81,19 @@ function getDesktopLinkNode() {
 
 function makeAtomImg() {
   const atomImg = document.createElement("img");
-  const imgUrl = chrome.extension.getURL("icon-64.png");
+  const imgUrl = chrome.extension.getURL("icon-16.png");
   atomImg.setAttribute("src", imgUrl);
   atomImg.setAttribute("class", "atom-img");
   return atomImg;
 }
 
-function makeAtomLink() {
+function makeAtomLink(text = true) {
   const atomLink = document.createElement("a");
-  const linkText = document.createTextNode("[Atom]");
   atomLink.setAttribute("class", "btn-link");
-  atomLink.appendChild(linkText);
+  if (text) {
+    const linkText = document.createTextNode("[Atom]");
+    atomLink.appendChild(linkText);
+  }
   return atomLink;
 }
 
